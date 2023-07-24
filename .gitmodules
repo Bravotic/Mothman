@@ -1,0 +1,3 @@
+[submodule "cdraw"]
+	path = cdraw
+	url = https://github.com/Bravotic/CDraw
