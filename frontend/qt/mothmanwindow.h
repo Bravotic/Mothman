@@ -19,6 +19,8 @@ public:
 
     ~MothmanWindow();
 private:
+    void goToUrl();
+
     MothmanView *n;
     QScrollArea *sa;
     QVBoxLayout *vb;

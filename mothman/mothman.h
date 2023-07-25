@@ -1,3 +1,6 @@
+#ifndef _MOTHMAN_H
+#define _MOTHMAN_H 1
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -6,6 +9,7 @@
 #include <stdio.h>
 
 #include "tagparser.h"
+
 
 typedef struct renderState_t {
     surface* page;
@@ -52,6 +56,8 @@ typedef struct parserState_t {
     struct HTMLElement_t *root;
     struct HTMLElement_t *current;
 } parserState_t;
+
+#include "protohandle.h"
 
 enum type {
     HTML_TYPE_NONE,
@@ -144,3 +150,5 @@ void recursivePrintHtmlElement(HTMLElement_t *root);
 surface *addRowToPage(surface *row, surface *page, int *centered);
 
 surface *renderPage(HTMLElement_t *root, RenderSettings_t *settings, int pageWidth);
+
+#endif // MOTHMAN_H

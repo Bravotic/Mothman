@@ -33,6 +33,8 @@ set(PROJECT_SOURCES
         mothman/tagparser.c
         mothman/mothman.h
         mothman/tagparser.h
+        mothman/protohandle.c
+        mothman/protohandle.h
 
         frontend/qt/main.cpp
         frontend/qt/mothmanwindow.cpp

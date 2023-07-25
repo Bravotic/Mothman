@@ -7,16 +7,18 @@ MothmanWindow::MothmanWindow(QWidget *parent)
     vb = new QVBoxLayout(this);
     chrome = new QToolBar();
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open HTML Document"), "", tr("HTML Document (*.htm *.html)"));
-    this->setWindowTitle(QString("Mothman | " + fileName));
+    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open HTML Document"), "", tr("HTML Document (*.htm *.html)"));
+    this->setWindowTitle(QString("Mothman"));
 
     back = new QPushButton("<");
     forward = new QPushButton(">");
-    menu = new QPushButton("Menu");
+    menu = new QPushButton("Go!");
+
+    connect(menu, &QPushButton::released, this, &MothmanWindow::goToUrl);
     url = new QLineEdit();
     url->setFrame(false);
     url->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    url->setText("file://" + fileName.toHtmlEscaped());
+    url->setText("https://bravotic.com");
 
     chrome->addWidget(back);
     chrome->addWidget(forward);
@@ -24,7 +26,7 @@ MothmanWindow::MothmanWindow(QWidget *parent)
     chrome->addWidget(menu);
     chrome->setMovable(false);
 
-    n = new MothmanView(fileName.toStdString().c_str());
+    n = new MothmanView("https://bravotic.com");
     sa = new QScrollArea();
 
     sa->setWidget(n);
@@ -36,6 +38,10 @@ MothmanWindow::MothmanWindow(QWidget *parent)
     vb->setContentsMargins(0, 0, 0, 0);
     vb->setSpacing(0);
     this->setLayout(vb);
+}
+
+void MothmanWindow::goToUrl() {
+    n->loadURL(url->text().toStdString().c_str());
 }
 
 MothmanWindow::~MothmanWindow()

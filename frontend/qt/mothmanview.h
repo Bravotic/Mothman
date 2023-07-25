@@ -28,9 +28,7 @@ public:
         return QSize(contentW, contentH);
     }
 
-    void setPath(const char* path) {
-        this->path = path;
-    }
+    void loadURL(const char* url);
 
 public slots:
     void screenChanged();

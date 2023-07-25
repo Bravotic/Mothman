@@ -26,16 +26,18 @@ MothmanView::MothmanView(const char *url, QWidget *parent) : QWidget(parent)
     // Load the page
     this->ps = createParserState();
 
-    // Read and parse our HTML
-    FILE *book = fopen(path, "r");
-    while((c = fgetc(book)) != EOF) {
-        parserHTMLAddChar(this->ps, c);
-    }
-    parserHTMLAddChar(this->ps, 0);
-    fclose(book);
+    openURL(url, ps);
 
     this->needsToRerender = true;
 
+}
+
+void MothmanView::loadURL(const char* url) {
+    freeParserState(this->ps);
+    this->ps = createParserState();
+    openURL(url, ps);
+    this->needsToRerender = true;
+    this->repaint();
 }
 
 QSize MothmanView::sizeHint() const {
