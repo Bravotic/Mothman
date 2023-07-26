@@ -628,74 +628,88 @@ surface *renderPage(HTMLElement_t *root, RenderSettings_t *settings, int pw) {
 
         if (current->type == HTML_TYPE_TEXT) {
             surface *word;
-            int size, i;
+            char *wordBuffer;
+            int size, i, running, wordBufferPtr, wordBufferCap;
             color_t color;
 
             start = current->text;
-            i = 0;
-            while(1) {
-                if (current->text[i] <= ' ' || current->text[i] == 0) {
-                    int wordWidth;
-                    char oldChar;
 
-                    if(current->text != 0) {
-                        oldChar = current->text[i + 1];
-                        current->text[i + 1] = 0;
-                    }
-                    else {
-                        oldChar = 0;
-                    }
+            wordBufferPtr = 0;
+            wordBufferCap = 64;
+            wordBuffer = malloc(wordBufferCap * sizeof(char));
 
-                    if (flagGet(current->flags, HTML_FLAG_HUGE)) {
-                        size = (int)round((double)settings->fontSize * settings->scale * 2);
-                    }
-                    else if(flagGet(current->flags, HTML_FLAG_LARGE)) {
-                        size = (int)round((double)settings->fontSize * 1.5 * settings->scale);
-                    }
-                    else {
-                        size = (int)round((double)settings->fontSize * settings->scale);
-                    }
+            /* This is pretty ugly and weird to follow, but it should be pretty efficient */
+            /* Might end up making this more straight forward in the future */
+            for(i = 0, running = 1; running; i++) {
+                switch (current->text[i]) {
+                    case 0:
+                        running = 0;
+                        /* fall through */
+                    case ' ':
+                    {
+                        int wordWidth;
 
-                    if (flagGet(current->flags, HTML_FLAG_LINK)) {
-                        color = settings->linkColor;
-                    }
-                    else {
-                        color = settings->textColor;
-                    }
 
-                    word = DL_text(start, size, color, settings->defaultFont, flagGet(current->flags, HTML_FLAG_BOLD), flagGet(current->flags, HTML_FLAG_ITALICS));
-                    wordWidth = DL_get_width(word);
+                        /* Edge case where if we are really unlucky, and
+                         * wordBufferPtr is right on the edge, we could
+                         * accidentally write to memory we should be able to,
+                         * Fix me. */
+                        wordBuffer[wordBufferPtr++] = current->text[i];
+                        wordBuffer[wordBufferPtr] = 0;
 
-                    if (rowWidth + wordWidth >= pageWidth) {
-                        surface *newPage;
+                        if (flagGet(current->flags, HTML_FLAG_HUGE)) {
+                           size = (int)round((double)settings->fontSize * settings->scale * 2);
+                        }
+                        else if(flagGet(current->flags, HTML_FLAG_LARGE)) {
+                            size = (int)round((double)settings->fontSize * 1.5 * settings->scale);
+                        }
+                        else {
+                            size = (int)round((double)settings->fontSize * settings->scale);
+                        }
 
-                        newPage = addRowToPage(row, page, &centered);
-                        DL_free_surface(row);
-                        DL_free_surface(page);
-                        page = newPage;
-                        row = word;
-                        rowWidth = wordWidth;
-                    }
-                    else {
-                        surface *newRow;
+                        if (flagGet(current->flags, HTML_FLAG_LINK)) {
+                            color = settings->linkColor;
+                        }
+                        else {
+                            color = settings->textColor;
+                        }
 
-                        newRow = DL_beside_align(row, word, BOTTOM);
-                        DL_free_surface(row);
-                        DL_free_surface(word);
-                        row = newRow;
-                        rowWidth += wordWidth;
-                    }
+                        word = DL_text(wordBuffer, size, color, settings->defaultFont, flagGet(current->flags, HTML_FLAG_BOLD), flagGet(current->flags, HTML_FLAG_ITALICS));
+                        wordWidth = DL_get_width(word);
 
-                    if(oldChar != 0) {
-                        current->text[i + 1] = oldChar;
-                        start = &current->text[i + 1];
+                        if (rowWidth + wordWidth >= pageWidth) {
+                            surface *newPage;
+
+                            newPage = addRowToPage(row, page, &centered);
+                            DL_free_surface(row);
+                            DL_free_surface(page);
+                            page = newPage;
+                            row = word;
+                            rowWidth = wordWidth;
+                        }
+                        else {
+                            surface *newRow;
+
+                            newRow = DL_beside_align(row, word, BOTTOM);
+                            DL_free_surface(row);
+                            DL_free_surface(word);
+                            row = newRow;
+                            rowWidth += wordWidth;
+                        }
+
+                        wordBufferPtr = 0;
                     }
-                    else {
-                        break;
-                    }
+                    break;
+                    default:
+                        wordBuffer[wordBufferPtr++] = current->text[i];
+                        if (wordBufferPtr >= wordBufferCap) {
+                            wordBufferCap += 64;
+                            wordBuffer = realloc(wordBuffer, wordBufferCap);
+                        }
+                    break;
                 }
-                i++;
             }
+
         }
         else if(current->type == HTML_TYPE_NEWLINE) {
             surface *newPage;
