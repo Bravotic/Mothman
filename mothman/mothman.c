@@ -649,6 +649,12 @@ surface *renderPage(HTMLElement_t *root, RenderSettings_t *settings, int pw) {
                     {
                         int wordWidth;
 
+                        /* This should stop all Qt Painter errors */
+                        if(wordBufferPtr == 0 && !running) {
+
+                            break;
+                        }
+
 
                         /* Edge case where if we are really unlucky, and
                          * wordBufferPtr is right on the edge, we could
