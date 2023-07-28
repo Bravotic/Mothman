@@ -72,6 +72,10 @@ enum tags {
     HTML_HR,
     HTML_H1,
     HTML_H2,
+    HTML_H3,
+    HTML_H4,
+    HTML_H5,
+    HTML_H6,
     HTML_TITLE,
     HTML_STYLE,
     HTML_SCRIPT,
@@ -337,6 +341,30 @@ void parserHTMLAddChar(parserState_t *ps, char c) {
 
                     break;
 
+                    case HTML_H3:
+                        ps->bold -= 1;
+                        addBlankLine(ps);
+
+                    break;
+
+                    case HTML_H4:
+                        ps->bold -= 1;
+                        ps->small -= 1;
+                        addBlankLine(ps);
+                    break;
+
+                    case HTML_H5:
+                        ps->bold -= 1;
+                        ps->tiny -= 1;
+                        addBlankLine(ps);
+                    break;
+
+                    case HTML_H6:
+                        ps->bold -= 1;
+                        ps->tiny -= 1;
+                        addBlankLine(ps);
+                    break;
+
                     case HTML_BR:
                         addNewLine(ps);
                     break;
@@ -395,6 +423,29 @@ void parserHTMLAddChar(parserState_t *ps, char c) {
                         addBlankLine(ps);
                         ps->bold += 1;
                         ps->large += 1;
+                    break;
+
+                    case HTML_H3:
+                        addBlankLine(ps);
+                        ps->bold += 1;
+                    break;
+
+                    case HTML_H4:
+                        addBlankLine(ps);
+                        ps->bold += 1;
+                        ps->small += 1;
+                    break;
+
+                    case HTML_H5:
+                        addBlankLine(ps);
+                        ps->bold += 1;
+                        ps->tiny += 1;
+                    break;
+
+                    case HTML_H6:
+                        addBlankLine(ps);
+                        ps->bold += 1;
+                        ps->tiny += 1;
                     break;
 
                     case HTML_P:
@@ -668,6 +719,12 @@ surface *renderPage(HTMLElement_t *root, RenderSettings_t *settings, int pw) {
                         }
                         else if(flagGet(current->flags, HTML_FLAG_LARGE)) {
                             size = (int)round((double)settings->fontSize * 1.5 * settings->scale);
+                        }
+                        else if(flagGet(current->flags, HTML_FLAG_SMALL)) {
+                            size = (int)round((double)settings->fontSize * 0.75 * settings->scale);
+                        }
+                        else if(flagGet(current->flags, HTML_FLAG_TINY)) {
+                            size = (int)round((double)settings->fontSize * 0.5 * settings->scale);
                         }
                         else {
                             size = (int)round((double)settings->fontSize * settings->scale);
